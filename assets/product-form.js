@@ -25,7 +25,6 @@ if (!customElements.get('product-form')) {
     onSubmitHandler(evt) {
       evt.preventDefault();
       if (this.submitButton.getAttribute('aria-disabled') === 'true') return;
-
       this.handleErrorMessage();
 
       this.submitButton.setAttribute('aria-disabled', true);
@@ -34,8 +33,7 @@ if (!customElements.get('product-form')) {
 
       const config = fetchConfig('javascript');
       config.headers['X-Requested-With'] = 'XMLHttpRequest';
-      delete config.headers['Content-Type'];
-      
+      delete config.headers['Content-Type'];      
 
       const formData = new FormData(this.form);
       if (this.cart) {        
@@ -66,15 +64,24 @@ if (!customElements.get('product-form')) {
 
           this.error = false;
           const quickAddModal = this.closest('quick-add-modal');
+          let mainProduct = this.form.querySelector('[name=id]').value;
+          let giftProduct = this.form.querySelector('[name=freeGift]').value;
 
-          if(this.form.querySelector('[name=freeGift]')){
+          if(!localStorage.getItem(mainProduct) && this.form.querySelector('[name=freeGift]')){
+            // let freeGifts = {};
+            // freeGifts[mainProduct] = giftProduct;
+            localStorage.setItem(mainProduct, giftProduct);
+
              formData.set('id', this.form.querySelector('[name=freeGift]').value);
-            config.body = formData;
+             formData.set('quantity', 1);
+             config.body = formData;
+
+            // window.freeGiftProduct = {...freeGifts}
             
             fetch(`${routes.cart_add_url}`, config)
             .then(response => response.json())
             .then(data=>{
-               this.sectionRender(data,quickAddModal)
+               this.sectionRender(data,quickAddModal);
             })
             .catch((error) => {
               console.error('Error:', error);

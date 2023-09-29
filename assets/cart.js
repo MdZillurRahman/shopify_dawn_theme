@@ -74,8 +74,11 @@ class CartItems extends HTMLElement {
       .then((state) => {
         const parsedState = JSON.parse(state);
          if(elm.dataset.giftindex){
-           console.log(elm.dataset.giftindex)
-           var line = elm.dataset.giftindex;
+          console.log(elm.dataset.giftindex);
+          
+          localStorage.removeItem(elm.dataset.productid);
+
+          var line = elm.dataset.giftindex;
           this.enableLoading(line);
       
           const body = JSON.stringify({
