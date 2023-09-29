@@ -13,6 +13,7 @@
   }
 </style>
 
+
 <cart-drawer class="drawer{% if cart == empty %} is-empty{% endif %}">
   <div id="CartDrawer" class="cart-drawer">
     <div id="CartDrawer-Overlay"class="cart-drawer__overlay"></div>
@@ -66,6 +67,11 @@
 
                   <tbody role="rowgroup">
                     {%- for item in cart.items -%}
+                      {% for tag in item.product.tags %}
+                        {% if tag == 'product:free-gift' %}
+                          {%- assign isGift = true -%}
+                        {% endif %}
+                      {% endfor %}
                       <tr id="CartDrawer-Item-{{ item.index | plus: 1 }}" class="cart-item" role="row">
                         <td class="cart-item__media" role="cell" headers="CartDrawer-ColumnProductImage">
                           {% if item.image %}
@@ -105,7 +111,7 @@
                             </div>
                           {%- else -%}
                             <div class="product-option">
-                              {{ item.original_price | money }}
+                              <div class="pn-price-item" data-id="{{ item.key }}">{% if item.product.tags contains 'free-gift-product' %} Free Gift {% else %} {{ item.original_price | money }} {% endif %}</div>
                             </div>
                           {%- endif -%}
 
@@ -152,7 +158,7 @@
                           </ul>
                         </td>
 
-                        <td class="cart-item__totals right" role="cell" headers="CartDrawer-ColumnTotal">
+                        <!-- <td class="cart-item__totals right" role="cell" headers="CartDrawer-ColumnTotal">
                           <div class="loading-overlay hidden">
                             <div class="loading-overlay__spinner">
                               <svg aria-hidden="true" focusable="false" role="presentation" class="spinner" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
@@ -168,7 +174,7 @@
                                   {{ 'products.product.price.regular_price' | t }}
                                 </span>
                                 <s class="cart-item__old-price price price--end">
-                                  {{ item.original_line_price | money }}
+                                  <div class="pn-total-line-item" data-id="{{ item.key }}">{{ item.original_line_price | money }}</div>
                                 </s>
                                 <span class="visually-hidden">
                                   {{ 'products.product.price.sale_price' | t }}
@@ -179,7 +185,7 @@
                               </div>
                             {%- else -%}
                               <span class="price price--end">
-                                {{ item.original_line_price | money }}
+                                <div class="pn-total-line-item" data-id="{{ item.key }}">{{ item.original_line_price | money }}</div>
                               </span>
                             {%- endif -%}
 
@@ -196,9 +202,11 @@
                               </div>
                             {%- endif -%}
                           </div>
-                        </td>
+                        </td> -->
 
-                        <td class="cart-item__quantity" role="cell" headers="CartDrawer-ColumnQuantity">
+
+                        
+                        <td class="cart-item__quantity {% if item.product.tags contains 'free-gift-product' %} hidden {% endif %}" role="cell" headers="CartDrawer-ColumnQuantity">
                           <div class="cart-item__quantity-wrapper">
                             <quantity-input class="quantity">
                               <button class="quantity__button no-js-hidden" name="minus" type="button">
@@ -220,7 +228,7 @@
                               </button>
                             </quantity-input>
 
-                            <cart-remove-button id="CartDrawer-Remove-{{ item.index | plus: 1 }}" data-index="{{ item.index | plus: 1 }}">
+                            <cart-remove-button id="CartDrawer-Remove-{{ item.index | plus: 1 }}" data-index="{{ item.index | plus: 1 }}" {% if item.product.tags contains 'product:free-gift' %}data-giftIndex="{{ item.index }}"{% endif %}>
                               <button type="button" class="button button--tertiary" aria-label="{{ 'sections.cart.remove_title' | t: title: item.title }}">
                                 {% render 'icon-remove' %}
                               </button>

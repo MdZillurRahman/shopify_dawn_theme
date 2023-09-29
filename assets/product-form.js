@@ -5,12 +5,22 @@ if (!customElements.get('product-form')) {
 
       this.form = this.querySelector('form');
       this.form.querySelector('[name=id]').disabled = false;
-      this.form.querySelector('[name=freeGift]').disabled = false;
       this.form.addEventListener('submit', this.onSubmitHandler.bind(this));
       this.cart = document.querySelector('cart-notification') || document.querySelector('cart-drawer');
       this.submitButton = this.querySelector('[type="submit"]');
       if (document.querySelector('cart-drawer')) this.submitButton.setAttribute('aria-haspopup', 'dialog');
     }
+
+    sectionRender(data,quickAddModal){
+      if (quickAddModal) {
+        document.body.addEventListener('modalClosed', () => {
+          setTimeout(() => { this.cart.renderContents(data) });
+        }, { once: true });
+        quickAddModal.hide(true);
+      } else {
+        this.cart.renderContents(data);
+      }
+    };
 
     onSubmitHandler(evt) {
       evt.preventDefault();
@@ -25,11 +35,10 @@ if (!customElements.get('product-form')) {
       const config = fetchConfig('javascript');
       config.headers['X-Requested-With'] = 'XMLHttpRequest';
       delete config.headers['Content-Type'];
-
+      
 
       const formData = new FormData(this.form);
-      console.log(formData)
-      if (this.cart) {
+      if (this.cart) {        
         formData.append('sections', this.cart.getSectionsToRender().map((section) => section.id));
         formData.append('sections_url', window.location.pathname);
         this.cart.setActiveElement(document.activeElement);
@@ -57,14 +66,23 @@ if (!customElements.get('product-form')) {
 
           this.error = false;
           const quickAddModal = this.closest('quick-add-modal');
-          if (quickAddModal) {
-            document.body.addEventListener('modalClosed', () => {
-              setTimeout(() => { this.cart.renderContents(response) });
-            }, { once: true });
-            quickAddModal.hide(true);
-          } else {
-            this.cart.renderContents(response);
+
+          if(this.form.querySelector('[name=freeGift]')){
+             formData.set('id', this.form.querySelector('[name=freeGift]').value);
+            config.body = formData;
+            
+            fetch(`${routes.cart_add_url}`, config)
+            .then(response => response.json())
+            .then(data=>{
+               this.sectionRender(data,quickAddModal)
+            })
+            .catch((error) => {
+              console.error('Error:', error);
+            });
+          }else{
+            this.sectionRender(response,quickAddModal)
           }
+
         })
         .catch((e) => {
           console.error(e);
