@@ -605,6 +605,15 @@
                       value="{{ product.selected_or_first_available_variant.id }}"
                       disabled
                     >
+                    {% if product.tags contains 'product:free-gift' %}
+                      {% assign giftProduct = product.metafields.custom.gift_product.value.id %}
+                      <input
+                        type="hidden"
+                        name="freeGift"
+                        value= "{{ giftProduct }}"
+                        disabled
+                      >
+                    {% endif %}
                     <div class="product-form__buttons">
                       <button
                         type="submit"
@@ -1162,7 +1171,7 @@
         {%- endfor -%}
       ]
     }
-  </script>
+  </script>         
 </section>
 
 {% schema %}
